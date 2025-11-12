@@ -1,2 +1,1 @@
-.github/workflows/template-sync.yml
-.github/workflows/quality.yml
+delete: remove .templatesyncignore
