@@ -18,26 +18,27 @@ export const limit = 10;
  * @returns {JSX.Element}
  */
 export default function PlaylistsPage() {
-  // Initialize navigate function
   const navigate = useNavigate();
 
-  // state for playlists data
+  // playlists réellement affichées
   const [playlists, setPlaylists] = useState([]);
 
-  // state for loading and error
+  // 👇 NOUVEL ÉTAT : total de playlists dans le compte Spotify
+  const [totalPlaylists, setTotalPlaylists] = useState(0);
+
+  // loading + error
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // require token to fetch playlists
   const { token } = useRequireToken();
 
-  // Set document title
-  useEffect(() => { document.title = buildTitle('Playlists'); }, []);
+  useEffect(() => {
+    document.title = buildTitle('Playlists');
+  }, []);
 
   useEffect(() => {
-    if (!token) return; // wait for auth check
+    if (!token) return;
 
-    // fetch user playlists when token changes
     fetchUserPlaylists(token, limit)
       .then(res => {
         if (res.error) {
@@ -45,18 +46,31 @@ export default function PlaylistsPage() {
             setError(res.error);
           }
         }
+
+        // playlists à afficher
         setPlaylists(res.data.items ?? []);
+
+        // 👇 on stocke aussi le total retourné par l’API
+        setTotalPlaylists(res.data.total ?? 0);
       })
-      .catch(err => { setError(err.message); })
-      .finally(() => { setLoading(false); });
+      .catch(err => {
+        setError(err.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [token, navigate]);
 
   return (
     <section className="playlists-container page-container" aria-labelledby="playlists-title">
-      <h1 id="playlists-title" className="playlists-title page-title">Your Playlists</h1>
+      <h1 id="playlists-title" className="playlists-title page-title">
+        Your Playlists
+      </h1>
 
-      {/* ---- CORRECTION : afficher le vrai nombre ---- */}
-      <h2 className="playlists-count">{playlists.length} Playlists</h2>
+      {/* Pour l’instant : nombre de playlists réellement chargées */}
+      <h2 className="playlists-count">
+        {playlists.length} Playlists
+      </h2>
 
       {loading && (
         <output className="playlists-loading" data-testid="loading-indicator">
@@ -65,7 +79,9 @@ export default function PlaylistsPage() {
       )}
 
       {error && !loading && (
-        <div className="playlists-error" role="alert">{error}</div>
+        <div className="playlists-error" role="alert">
+          {error}
+        </div>
       )}
 
       {!loading && !error && (
