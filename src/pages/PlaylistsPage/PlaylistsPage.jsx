@@ -20,13 +20,8 @@ export const limit = 10;
 export default function PlaylistsPage() {
   const navigate = useNavigate();
 
-  // playlists réellement affichées
   const [playlists, setPlaylists] = useState([]);
-
-  // 👇 NOUVEL ÉTAT : total de playlists dans le compte Spotify
   const [totalPlaylists, setTotalPlaylists] = useState(0);
-
-  // loading + error
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -47,10 +42,7 @@ export default function PlaylistsPage() {
           }
         }
 
-        // playlists à afficher
         setPlaylists(res.data.items ?? []);
-
-        // 👇 on stocke aussi le total retourné par l’API
         setTotalPlaylists(res.data.total ?? 0);
       })
       .catch(err => {
@@ -67,9 +59,9 @@ export default function PlaylistsPage() {
         Your Playlists
       </h1>
 
-      {/* Pour l’instant : nombre de playlists réellement chargées */}
+      {/* 👇 NOUVEL AFFICHAGE : X of Y Playlists */}
       <h2 className="playlists-count">
-        {playlists.length} Playlists
+        {playlists.length} of {totalPlaylists} Playlists
       </h2>
 
       {loading && (
