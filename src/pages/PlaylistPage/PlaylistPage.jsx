@@ -1,10 +1,10 @@
-// src/pages/PlaylistPage/PlaylistPage.jsx
-
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useRequireToken } from '../../hooks/useRequireToken.js';
-import { fetchPlaylistById } from '../../api/spotify-me.js';
-import { handleTokenError } from '../../utils/handleTokenError.js';
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { buildTitle } from "../../constants/appMeta";
+import { useRequireToken } from "../../hooks/useRequireToken";
+import { fetchPlaylistById } from "../../api/spotify-playlists";
+import { handleTokenError } from "../../utils/handleTokenError";
+import "../../styles/PlaylistDetailPage.css";
 
 export default function PlaylistPage() {
   const { id } = useParams();
@@ -12,11 +12,15 @@ export default function PlaylistPage() {
   const { token } = useRequireToken();
 
   const [playlist, setPlaylist] = useState(null);
-  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!token) return;
+    document.title = buildTitle("Playlist Details");
+  }, []);
+
+  useEffect(() => {
+    if (!token || !id) return;
 
     fetchPlaylistById(token, id)
       .then((res) => {
@@ -25,33 +29,57 @@ export default function PlaylistPage() {
             setError(res.error);
           }
         } else {
-          console.log('📌 Playlist récupérée :', res.data);
           setPlaylist(res.data);
         }
       })
-      .catch((err) => {
-        console.error('❌ Erreur API playlist :', err);
-        setError(err.message);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      .catch(() => setError("Failed to fetch playlist"))
+      .finally(() => setLoading(false));
   }, [token, id, navigate]);
 
+  if (loading) {
+    return <div className="playlist-loading">Loading playlist…</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="playlist-error" role="alert">
+        {error}
+      </div>
+    );
+  }
+
+  if (!playlist) {
+    return <div className="playlist-error">Playlist not found.</div>;
+  }
+
   return (
-    <section>
-      <h1>Playlist Detail Page</h1>
-      <p>Playlist ID: {id}</p>
+    <section className="playlist-detail-container page-container">
+      <h1 className="playlist-title page-title">{playlist.name}</h1>
 
-      {loading && <p>Chargement…</p>}
+      <div className="playlist-header">
+        {playlist.images?.[0] && (
+          <img
+            src={playlist.images[0].url}
+            alt={playlist.name}
+            className="playlist-cover"
+          />
+        )}
 
-      {error && (
-        <p style={{ color: 'red' }}>
-          Erreur : {error}
-        </p>
-      )}
+        <div className="playlist-info">
+          <p className="playlist-description">
+            {playlist.description || "No description available."}
+          </p>
 
-      {!loading && !error && !playlist && <p>Aucune donnée de playlist.</p>}
+          <a
+            href={playlist.external_urls.spotify}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="playlist-open-button"
+          >
+            Open on Spotify
+          </a>
+        </div>
+      </div>
     </section>
   );
 }
