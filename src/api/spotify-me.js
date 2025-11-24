@@ -9,7 +9,7 @@ import { SPOTIFY_API_BASE } from "./spotify-commons";
  * @param {string} token - The Spotify access token.
  * @param {number} [limit=10] - The number of artists to fetch.
  * @param {string} [timeRange='short_term'] - The time range for top artists.
- * @returns {Promise<{ artists: object[], error: string|null }>} - The artists or an error message.
+ * @returns {Promise<{ data: object|null, error: string|null }>}
  */
 export async function fetchUserTopArtists(token, limit = 10, timeRange = 'short_term') {
   // early return if no token
@@ -19,8 +19,10 @@ export async function fetchUserTopArtists(token, limit = 10, timeRange = 'short_
 
   try {
     // fetch top artists from Spotify API
-    const res = await fetch(`${SPOTIFY_API_BASE}/me/top/artists?limit=${limit}&time_range=${timeRange}`,
-      { headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch(
+      `${SPOTIFY_API_BASE}/me/top/artists?limit=${limit}&time_range=${timeRange}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
     const data = await res.json();
 
     // handle potential API error
@@ -38,7 +40,7 @@ export async function fetchUserTopArtists(token, limit = 10, timeRange = 'short_
 /**
  * Fetch the Spotify account profile for the given access token.
  * @param {string} token - The Spotify access token.
- * @returns {Promise<{ profile: object|null, error: string|null }>} - The account profile or an error message.
+ * @returns {Promise<{ data: object|null, error: string|null }>}
  */
 export async function fetchAccountProfile(token) {
   // early return if no token
@@ -69,7 +71,7 @@ export async function fetchAccountProfile(token) {
  * Fetch the user's playlists from Spotify.
  * @param {string} token - The Spotify access token.
  * @param {number} [limit=10] - The number of playlists to fetch.
- * @returns {Promise<{ playlists: object[], error: string|null }>} - The playlists or an error message.
+ * @returns {Promise<{ data: object|null, error: string|null }>}
  */
 export async function fetchUserPlaylists(token, limit = 10) {
   // early return if no token
@@ -101,7 +103,7 @@ export async function fetchUserPlaylists(token, limit = 10) {
  * @param {string} token - The Spotify access token.
  * @param {number} [limit=10] - The number of tracks to fetch.
  * @param {string} [timeRange='short_term'] - The time range for top tracks.
- * @returns {Promise<{ tracks: object[], error: string|null }>} - The tracks or an error message.
+ * @returns {Promise<{ data: object|null, error: string|null }>}
  */
 export async function fetchUserTopTracks(token, limit = 10, timeRange = 'short_term') {
   // early return if no token
@@ -110,9 +112,12 @@ export async function fetchUserTopTracks(token, limit = 10, timeRange = 'short_t
   }
   try {
     // fetch top tracks from Spotify API
-    const res = await fetch(`${SPOTIFY_API_BASE}/me/top/tracks?limit=${limit}&time_range=${timeRange}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await fetch(
+      `${SPOTIFY_API_BASE}/me/top/tracks?limit=${limit}&time_range=${timeRange}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     const data = await res.json();
 
     // handle potential API error
@@ -123,5 +128,32 @@ export async function fetchUserTopTracks(token, limit = 10, timeRange = 'short_t
     return { data, error: null };
   } catch {
     return { error: 'Failed to fetch top tracks.', data: { items: [], total: 0 } };
+  }
+}
+
+/**
+ * Fetch a playlist by its id (with tracks).
+ * @param {string} token - The Spotify access token.
+ * @param {string} playlistId - The playlist id.
+ * @returns {Promise<{ data: object|null, error: string|null }>}
+ */
+export async function fetchPlaylistById(token, playlistId) {
+  if (!token) {
+    return { error: 'No access token found.', data: null };
+  }
+
+  try {
+    const res = await fetch(`${SPOTIFY_API_BASE}/playlists/${playlistId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      return { error: data.error.message, data: null };
+    }
+
+    return { data, error: null };
+  } catch {
+    return { error: 'Failed to fetch playlist.', data: null };
   }
 }
