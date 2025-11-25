@@ -62,12 +62,13 @@ describe('PlaylistPage', () => {
 
         expect(document.title).toBe("Playlist | Music Discovery App");
 
-        expect(await screen.findByRole('heading', { level: 1, name: playlistData.name }))
-            .toBeInTheDocument();
+        expect(
+            await screen.findByRole('heading', { level: 1, name: playlistData.name })
+        ).toBeInTheDocument();
     });
 
     test('handles token expiration', async () => {
-        // 👉 IMPORTANT : pas de variable 'spy', sinon ESLint échoue
+        // ON MOCKE juste la fonction, pas besoin d’assigner une variable (sinon Sonar → duplication/unuesed)
         jest.spyOn(handleTokenErrorModule, "handleTokenError");
 
         jest.spyOn(spotifyApi, "fetchPlaylistById")
@@ -87,4 +88,3 @@ describe('PlaylistPage', () => {
         });
     });
 });
-
