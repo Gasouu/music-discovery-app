@@ -56,20 +56,19 @@ describe('PlaylistPage', () => {
             </MemoryRouter>
         );
 
-        await waitFor(() => {
-            expect(screen.queryByTestId('loading-indicator')).not.toBeInTheDocument();
-        });
+        // ❗ UNE SEULE ASSERTION DANS waitFor — valide ESLint
+        await waitFor(() =>
+            expect(screen.queryByTestId('loading-indicator')).not.toBeInTheDocument()
+        );
 
         expect(document.title).toBe("Playlist | Music Discovery App");
 
-        expect(
-            await screen.findByRole('heading', { level: 1, name: playlistData.name })
-        ).toBeInTheDocument();
+        expect(await screen.findByRole('heading', { level: 1, name: playlistData.name }))
+            .toBeInTheDocument();
     });
 
     test('handles token expiration', async () => {
-        // ON MOCKE juste la fonction, pas besoin d’assigner une variable (sinon Sonar → duplication/unuesed)
-        jest.spyOn(handleTokenErrorModule, "handleTokenError");
+        const handleSpy = jest.spyOn(handleTokenErrorModule, "handleTokenError");
 
         jest.spyOn(spotifyApi, "fetchPlaylistById")
             .mockResolvedValue({ data: null, error: "The access token expired" });
@@ -83,8 +82,8 @@ describe('PlaylistPage', () => {
             </MemoryRouter>
         );
 
-        await waitFor(() => {
-            expect(handleTokenErrorModule.handleTokenError).toHaveBeenCalled();
-        });
+        await waitFor(() =>
+            expect(handleSpy).toHaveBeenCalled()
+        );
     });
 });
