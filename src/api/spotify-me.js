@@ -7,145 +7,108 @@ import { SPOTIFY_API_BASE } from "./spotify-commons";
 /**
  * Fetch the user's top artists from Spotify.
  * @param {string} token - The Spotify access token.
- * @param {number} [limit=10] - The number of artists to fetch.
- * @param {string} [timeRange='short_term'] - The time range for top artists.
+ * @param {number} [limit=10]
+ * @param {string} [timeRange='short_term']
  * @returns {Promise<{ data: object|null, error: string|null }>}
  */
-export async function fetchUserTopArtists(token, limit = 10, timeRange = 'short_term') {
-  // early return if no token
+export async function fetchUserTopArtists(token, limit = 10, timeRange = "short_term") {
   if (!token) {
-    return { error: 'No access token found.', artists: [] };
+    return { error: "No access token found.", data: null };
   }
 
   try {
-    // fetch top artists from Spotify API
     const res = await fetch(
       `${SPOTIFY_API_BASE}/me/top/artists?limit=${limit}&time_range=${timeRange}`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
+
     const data = await res.json();
 
-    // handle potential API error
     if (data.error) {
-      return { error: data.error.message, artists: [] };
+      return { error: data.error.message, data: null };
     }
 
-    // return fetched artists
     return { data, error: null };
   } catch {
-    return { error: 'Failed to fetch top artists.', artists: [] };
+    return { error: "Failed to fetch top artists.", data: null };
   }
 }
 
 /**
  * Fetch the Spotify account profile for the given access token.
- * @param {string} token - The Spotify access token.
+ * @param {string} token
  * @returns {Promise<{ data: object|null, error: string|null }>}
  */
 export async function fetchAccountProfile(token) {
-  // early return if no token
   if (!token) {
-    return { error: 'No access token found.', profile: null };
+    return { error: "No access token found.", data: null };
   }
 
   try {
-    // fetch account profile from Spotify API
     const res = await fetch(`${SPOTIFY_API_BASE}/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+
     const data = await res.json();
 
-    // handle potential API error
     if (data.error) {
       return { error: data.error.message, data: null };
     }
 
-    // return fetched profile
     return { data, error: null };
   } catch {
-    return { error: 'Failed to fetch account info.', profile: null };
+    return { error: "Failed to fetch account info.", data: null };
   }
 }
 
 /**
  * Fetch the user's playlists from Spotify.
- * @param {string} token - The Spotify access token.
- * @param {number} [limit=10] - The number of playlists to fetch.
+ * @param {string} token
+ * @param {number} [limit=10]
  * @returns {Promise<{ data: object|null, error: string|null }>}
  */
 export async function fetchUserPlaylists(token, limit = 10) {
-  // early return if no token
   if (!token) {
-    return { error: 'No access token found.', playlists: [] };
+    return { error: "No access token found.", data: null };
   }
 
   try {
-    // fetch playlists from Spotify API
     const res = await fetch(`${SPOTIFY_API_BASE}/me/playlists?limit=${limit}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+
     const data = await res.json();
 
-    // handle potential API error
     if (data.error) {
-      return { error: data.error.message, data: { items: [], total: 0 } };
+      return { error: data.error.message, data: null };
     }
 
-    // return fetched data
     return { data, error: null };
   } catch {
-    return { error: 'Failed to fetch playlists.', data: { items: [], total: 0 } };
+    return { error: "Failed to fetch playlists.", data: null };
   }
 }
 
 /**
  * Fetch the user's top tracks from Spotify.
- * @param {string} token - The Spotify access token.
- * @param {number} [limit=10] - The number of tracks to fetch.
- * @param {string} [timeRange='short_term'] - The time range for top tracks.
+ * @param {string} token
+ * @param {number} [limit=10]
+ * @param {string} [timeRange='short_term']
  * @returns {Promise<{ data: object|null, error: string|null }>}
  */
-export async function fetchUserTopTracks(token, limit = 10, timeRange = 'short_term') {
-  // early return if no token
+export async function fetchUserTopTracks(token, limit = 10, timeRange = "short_term") {
   if (!token) {
-    return { error: 'No access token found.', tracks: [] };
+    return { error: "No access token found.", data: null };
   }
+
   try {
-    // fetch top tracks from Spotify API
     const res = await fetch(
       `${SPOTIFY_API_BASE}/me/top/tracks?limit=${limit}&time_range=${timeRange}`,
       {
         headers: { Authorization: `Bearer ${token}` },
       }
     );
-    const data = await res.json();
 
-    // handle potential API error
-    if (data.error) {
-      return { error: data.error.message, tracks: [] };
-    }
-    // return fetched tracks
-    return { data, error: null };
-  } catch {
-    return { error: 'Failed to fetch top tracks.', data: { items: [], total: 0 } };
-  }
-}
-
-/**
- * Fetch a playlist by its id (with tracks).
- * @param {string} token - The Spotify access token.
- * @param {string} playlistId - The playlist id.
- * @returns {Promise<{ data: object|null, error: string|null }>}
- */
-export async function fetchPlaylistById(token, playlistId) {
-  if (!token) {
-    return { error: 'No access token found.', data: null };
-  }
-
-  try {
-    const res = await fetch(`${SPOTIFY_API_BASE}/playlists/${playlistId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
     const data = await res.json();
 
     if (data.error) {
@@ -154,6 +117,34 @@ export async function fetchPlaylistById(token, playlistId) {
 
     return { data, error: null };
   } catch {
-    return { error: 'Failed to fetch playlist.', data: null };
+    return { error: "Failed to fetch top tracks.", data: null };
+  }
+}
+
+/**
+ * Fetch a playlist by ID (with tracks)
+ * @param {string} token
+ * @param {string} playlistId
+ * @returns {Promise<{ data: object|null, error: string|null }>}
+ */
+export async function fetchPlaylistById(token, playlistId) {
+  if (!token) {
+    return { error: "No access token found.", data: null };
+  }
+
+  try {
+    const res = await fetch(`${SPOTIFY_API_BASE}/playlists/${playlistId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const data = await res.json();
+
+    if (data.error) {
+      return { error: data.error.message, data: null };
+    }
+
+    return { data, error: null };
+  } catch {
+    return { error: "Failed to fetch playlist.", data: null };
   }
 }
