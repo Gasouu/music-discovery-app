@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { buildTitle } from '../../constants/appMeta.js';
 import { useRequireToken } from '../../hooks/useRequireToken.js';
 import { fetchUserTopArtists, fetchUserTopTracks } from '../../api/spotify-me.js';
+import { handleTokenError } from '../../utils/handleTokenError.js';
 
 import '../../styles/DashboardPage.css';
 
@@ -12,49 +13,53 @@ export default function DashboardPage() {
 
   const [topArtist, setTopArtist] = useState(null);
   const [topTrack, setTopTrack] = useState(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Title
   useEffect(() => {
     document.title = buildTitle('Dashboard');
   }, []);
 
-  // Fetch data
   useEffect(() => {
     if (!token) return;
 
     async function loadDashboard() {
+      setLoading(true);
+      setError(null);
+
       try {
-        setLoading(true);
-        setError(null);
+        // --- FETCH ARTISTS ---
+        const artistsRes = await fetchUserTopArtists(token, 1);
 
-        // --- TOP ARTISTS ---
-        const artistRes = await fetchUserTopArtists(token, 1, 'short_term');
-
-        if (artistRes.error) {
-          setError(artistRes.error);
+        if (artistsRes.error) {
+          if (!handleTokenError(artistsRes.error)) {
+            setError(artistsRes.error);
+          }
+          setLoading(false);
           return;
         }
 
-        const artist = artistRes.data?.items?.[0];
-        console.log("🎨 TOP ARTIST:", artist);
+        const artist = artistsRes.data?.items?.[0] ?? null;
+
+        // --- FETCH TRACKS ---
+        const tracksRes = await fetchUserTopTracks(token, 1);
+
+        if (tracksRes.error) {
+          if (!handleTokenError(tracksRes.error)) {
+            setError(tracksRes.error);
+          }
+          setLoading(false);
+          return;
+        }
+
+        const track = tracksRes.data?.items?.[0] ?? null;
+
         setTopArtist(artist);
-
-        // --- TOP TRACKS ---
-        const trackRes = await fetchUserTopTracks(token, 1, 'short_term');
-
-        if (trackRes.error) {
-          setError(trackRes.error);
-          return;
-        }
-
-        const track = trackRes.data?.items?.[0];
-        console.log("🎵 TOP TRACK:", track);
         setTopTrack(track);
 
       } catch (err) {
-        setError(err.message ?? "Failed to load dashboard data");
+        setError(err.message ?? 'Unexpected error.');
       } finally {
         setLoading(false);
       }
@@ -69,16 +74,59 @@ export default function DashboardPage() {
         Dashboard
       </h1>
 
-      {loading && <p>Loading dashboard…</p>}
-      {error && <p role="alert">Error: {error}</p>}
+      {loading && <p aria-live="polite">Loading dashboard…</p>}
+
+      {!loading && error && (
+        <div role="alert" className="dashboard-error">
+          Failed to load dashboard: {error}
+        </div>
+      )}
 
       {!loading && !error && (
         <>
-          <p className="dashboard-intro">Spotify overview:</p>
+          {/* ----- TOP ARTIST ----- */}
+          <div className="dashboard-card">
+            <h2>Most listened artist</h2>
+            {topArtist ? (
+              <div className="dashboard-section">
+                <img
+                  src={topArtist.images?.[0]?.url}
+                  alt={topArtist.name}
+                  className="dashboard-image"
+                />
+                <div>
+                  <p className="dashboard-name">{topArtist.name}</p>
+                  <p className="dashboard-subinfo">
+                    Genres: {topArtist.genres?.join(', ') || 'N/A'}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <p>No artist data available.</p>
+            )}
+          </div>
 
-          <pre style={{ background: "#111", padding: "12px", borderRadius: "8px" }}>
-            {JSON.stringify({ topArtist, topTrack }, null, 2)}
-          </pre>
+          {/* ----- TOP TRACK ----- */}
+          <div className="dashboard-card">
+            <h2>Most listened track</h2>
+            {topTrack ? (
+              <div className="dashboard-section">
+                <img
+                  src={topTrack.album?.images?.[0]?.url}
+                  alt={topTrack.name}
+                  className="dashboard-image"
+                />
+                <div>
+                  <p className="dashboard-name">{topTrack.name}</p>
+                  <p className="dashboard-subinfo">
+                    Artists: {topTrack.artists?.map(a => a.name).join(', ') || 'N/A'}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <p>No track data available.</p>
+            )}
+          </div>
         </>
       )}
     </section>
