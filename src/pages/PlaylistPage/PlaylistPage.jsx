@@ -1,16 +1,20 @@
 // src/pages/PlaylistPage/PlaylistPage.jsx
 
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { buildTitle } from '../../constants/appMeta.js';
+import { useRequireToken } from '../../hooks/useRequireToken.js';
+import { fetchPlaylistById } from '../../api/spotify-playlists.js';
+import { handleTokenError } from '../../utils/handleTokenError.js';
+import TrackItem from '../../components/TrackItem/TrackItem.jsx';
 
-import { useRequireToken } from "../../hooks/useRequireToken";
-import { fetchPlaylistById } from "../../api/spotify-playlists";
-import { handleTokenError } from "../../utils/handleTokenError";
-import TrackItem from "../../components/TrackItem/TrackItem.jsx";
-import { buildTitle } from "../../constants/appMeta";
+import '../PageLayout.css';
+import '../../styles/PlaylistDetailPage.css';
 
-import "../../styles/PlaylistDetailPage.css";
-
+/**
+ * Page de détail d'une playlist
+ * Affiche les infos de la playlist + la liste des pistes.
+ */
 export default function PlaylistPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -20,12 +24,12 @@ export default function PlaylistPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Titre de la page
+  // titre de la page
   useEffect(() => {
-    document.title = buildTitle("Playlist");
+    document.title = buildTitle('Playlist');
   }, []);
 
-  // Chargement de la playlist
+  // chargement de la playlist
   useEffect(() => {
     if (!token || !id) return;
 
@@ -35,118 +39,105 @@ export default function PlaylistPage() {
     fetchPlaylistById(token, id)
       .then((res) => {
         if (res.error) {
-          // si token expiré -> redirection gérée par handleTokenError
+          // gestion des erreurs de token expiré
           if (!handleTokenError(res.error, navigate)) {
             setError(res.error);
           }
-          setPlaylist(null);
           return;
         }
-
         setPlaylist(res.data);
       })
       .catch((err) => {
         setError(err.message);
-        setPlaylist(null);
       })
       .finally(() => {
         setLoading(false);
       });
   }, [token, id, navigate]);
 
-  // ⏳ Loading
-  if (loading) {
-    return (
-      <section className="playlist-detail-container">
-        <p className="playlist-detail-loading" role="status">
-          Loading playlist…
-        </p>
-      </section>
-    );
-  }
-
-  // ❌ Erreur
-  if (error) {
-    return (
-      <section className="playlist-detail-container">
-        <div className="playlist-detail-error" role="alert">
-          {error}
-        </div>
-      </section>
-    );
-  }
-
-  // 🚫 Playlist inexistante
-  if (!playlist) {
-    return (
-      <section className="playlist-detail-container">
-        <div className="playlist-detail-empty" role="alert">
-          Playlist not found.
-        </div>
-      </section>
-    );
-  }
-
-  const hasTracks = playlist.tracks?.items?.length > 0;
+  const imageUrl = playlist?.images?.[0]?.url ?? '';
+  const ownerName = playlist?.owner?.display_name ?? '';
+  const playlistUrl = playlist?.external_urls?.spotify ?? '#';
+  const tracksItems = playlist?.tracks?.items ?? [];
 
   return (
     <section
-      className="playlist-detail-container"
-      aria-labelledby="playlist-detail-title"
+      className="playlist-detail page-container"
+      aria-labelledby="playlist-title"
     >
-      <header className="playlist-detail-header">
-        {playlist.images?.[0] && (
-          <img
-            src={playlist.images[0].url}
-            alt={playlist.name}
-            className="playlist-detail-cover"
-          />
-        )}
+      {loading && (
+        <output
+          className="playlist-detail-loading"
+          data-testid="loading-indicator"
+        >
+          Loading playlist…
+        </output>
+      )}
 
-        <div className="playlist-detail-meta">
-          <h1
-            id="playlist-detail-title"
-            className="playlist-detail-title page-title"
-          >
-            {playlist.name}
-          </h1>
-
-          <p className="playlist-detail-description">
-            {playlist.description || "No description available."}
-          </p>
-
-          <p className="playlist-detail-owner">
-            By {playlist.owner?.display_name ?? "Unknown"}
-          </p>
-
-          {playlist.external_urls?.spotify && (
-            <a
-              className="playlist-detail-play-button"
-              href={playlist.external_urls.spotify}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Lire la playlist sur Spotify
-            </a>
-          )}
+      {error && !loading && (
+        <div className="playlist-detail-error" role="alert">
+          {error}
         </div>
-      </header>
+      )}
 
-      <section className="playlist-detail-tracks">
-        {hasTracks ? (
-          <ol className="playlist-detail-tracks-list">
-            {playlist.tracks.items.map((item, index) => (
-              <TrackItem
-                key={item.track.id ?? index}
-                track={item.track}
-                index={index}
+      {!loading && !error && playlist && (
+        <>
+          {/* En-tête de la playlist */}
+          <header className="playlist-detail-header">
+            {imageUrl && (
+              <img
+                src={imageUrl}
+                alt={playlist.name}
+                className="playlist-detail-cover"
               />
-            ))}
-          </ol>
-        ) : (
-          <p className="playlist-detail-empty">Cette playlist est vide.</p>
-        )}
-      </section>
+            )}
+
+            <div className="playlist-detail-meta">
+              <h1 id="playlist-title" className="playlist-detail-title">
+                {playlist.name}
+              </h1>
+
+              <p className="playlist-detail-description">
+                {playlist.description || 'No description available.'}
+              </p>
+
+              {ownerName && (
+                <p className="playlist-detail-owner">By {ownerName}</p>
+              )}
+
+              {playlistUrl && (
+                <a
+                  href={playlistUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="playlist-detail-play-button"
+                >
+                  ▶ Lire la playlist sur Spotify
+                </a>
+              )}
+            </div>
+          </header>
+
+          {/* Liste des pistes */}
+          <section className="playlist-detail-tracks">
+            {tracksItems.length === 0 ? (
+              <p className="playlist-detail-empty">
+                This playlist has no tracks yet.
+              </p>
+            ) : (
+              <ol className="playlist-detail-tracks-list">
+                {tracksItems.map((item, index) => (
+                  <TrackItem
+                    key={item.track.id}
+                    track={item.track}
+                    index={index}
+                  />
+                ))}
+              </ol>
+            )}
+          </section>
+        </>
+      )}
     </section>
   );
 }
