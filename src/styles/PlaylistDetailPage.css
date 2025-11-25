@@ -1,89 +1,64 @@
-/* Single playlist page styles */
-
-.playlist-container { max-width: 960px; margin: 0 auto; padding-bottom: 4rem; }
-
-.playlist-header {
-	display: flex;
-	align-items: flex-start;
-	gap: 2.2rem;
-	margin-bottom: 2.5rem;
-	margin-top: 2rem;
-	background: linear-gradient(90deg, #e9fbe7 0%, #f6fff9 100%);
-	border-radius: 18px;
-	box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1.5px 4px rgba(30,185,84,0.04);
-	padding: 2.2rem 2.5rem 2.2rem 2.2rem;
-	transition: box-shadow 0.18s;
+/* Playlist detail container */
+.playlist-detail-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  color: white;
 }
 
-.playlist-cover {
-	width: 180px;
-	height: 180px;
-	object-fit: cover;
-	border-radius: 12px;
-	box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-	background: #eee;
+/* Playlist header */
+.playlist-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
 }
 
-.playlist-header-image {
-	flex: 0 0 auto;
+.playlist-detail-cover {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
 }
 
-.playlist-header-text-with-link {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 2rem;
-	width: 100%;
+.playlist-detail-info {
+  flex: 1;
 }
 
-.playlist-header-text {
-	flex: 1 1 0%;
-	min-width: 0;
+.playlist-detail-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
 }
 
-.playlist-spotify-link {
-	display: inline-block;
-	margin-left: 1.5rem;
-	margin-top: 0.25rem;
-	padding: 0.5rem 1.1rem;
-	background: #1db954;
-	color: #fff;
-	border-radius: 24px;
-	font-weight: 600;
-	font-size: 1rem;
-	text-decoration: none;
-	transition: background 0.18s;
-	white-space: nowrap;
-}
-.playlist-spotify-link:hover,
-.playlist-spotify-link:focus {
-	background: #169c46;
-	color: #fff;
+.playlist-detail-description {
+  color: #ccc;
+  margin-bottom: 10px;
 }
 
-.playlist-title { 
-	font-size: clamp(1.75rem,5vw,2.5rem); font-weight:700; margin-bottom: .35rem; 
-	color: #000;}
-
-/* Multi-line truncation for description */
-.playlist-subtitle {
-	font-size: 1rem;
-	font-weight: 400;
-	margin: 0 0 1.25rem;
-	color: #555;
-	display: -webkit-box;
-	line-clamp: 1;
-	-webkit-line-clamp: 1; /* show up to 1 line */
-	-webkit-box-orient: vertical;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	max-width: 840px;
+.playlist-detail-owner {
+  color: #888;
 }
 
-.playlist-loading, .playlist-error { text-align: center; margin-top: 10vh; }
-.playlist-error { color: #b00020; }
+/* Track list */
+.playlist-track-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+}
 
-/* Basic list layout (one per line) retained as simple block elements */
-.playlist-list { list-style: none; padding: 0; margin: 0; }
-.playlist-list > div { margin-bottom: .75rem; }
-.playlist-list > div:last-child { margin-bottom: 0; }
+/* Spotify button */
+.playlist-open-button {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 10px 15px;
+  background-color: #1db954;
+  color: white;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.playlist-open-button:hover {
+  background-color: #19a148;
+}
