@@ -67,7 +67,8 @@ describe('PlaylistPage', () => {
     });
 
     test('handles token expiration', async () => {
-        const spy = jest.spyOn(handleTokenErrorModule, "handleTokenError");
+        // 👉 IMPORTANT : pas de variable 'spy', sinon ESLint échoue
+        jest.spyOn(handleTokenErrorModule, "handleTokenError");
 
         jest.spyOn(spotifyApi, "fetchPlaylistById")
             .mockResolvedValue({ data: null, error: "The access token expired" });
@@ -86,3 +87,4 @@ describe('PlaylistPage', () => {
         });
     });
 });
+
