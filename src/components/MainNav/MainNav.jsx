@@ -19,12 +19,13 @@ function NavItem({ to, children }) {
 }
 
 // Links for main navigation items
+const DashboardLink = () => <NavItem to="/dashboard">Dashboard</NavItem>;
 const TopTracksLink = () => <NavItem to="/top-tracks">Top Tracks</NavItem>;
 const TopArtistsLink = () => <NavItem to="/top-artists">Top Artists</NavItem>;
 const PlaylistsLink = () => <NavItem to="/playlists">Playlists</NavItem>;
 
 /**
- * Main navigation component that includes links to top tracks, top artists, playlists,
+ * Main navigation component that includes links to dashboard, top tracks, top artists, playlists,
  * and the user account section with avatar.
  * @returns {JSX.Element}
  */
@@ -49,9 +50,8 @@ export default function MainNav() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-  const token = localStorage.getItem(KEY_ACCESS_TOKEN);
+    const token = localStorage.getItem(KEY_ACCESS_TOKEN);
     if (!token || profile) return; // Not authenticated or already have cached profile
-
 
     fetchAccountProfile(token)
       .then((result) => {
@@ -70,12 +70,15 @@ export default function MainNav() {
         console.error('Failed to fetch account profile:', err);
         setError(err?.message || 'Failed to load profile');
       })
-      .finally(() => { setLoading(false); });
+      .finally(() => {
+        setLoading(false);
+      });
   }, [profile]);
 
   return (
     <div className="main-nav-wrapper">
       <nav className="layout-nav main-nav-flex">
+        <DashboardLink />
         <TopTracksLink />
         <TopArtistsLink />
         <PlaylistsLink />
