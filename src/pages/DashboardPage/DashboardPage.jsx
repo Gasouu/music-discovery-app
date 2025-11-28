@@ -16,10 +16,12 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Titre de la page
   useEffect(() => {
     document.title = buildTitle('Dashboard');
   }, []);
 
+  // Chargement des données
   useEffect(() => {
     if (!token) return;
 
@@ -28,20 +30,21 @@ export default function DashboardPage() {
       setError(null);
 
       try {
-        // Fetch top artist
+        // Top artist
         const artistRes = await fetchUserTopArtists(token, 1, 'short_term');
-        if (artistRes.error) throw new Error(artistRes.error);
-
-        const artist = artistRes.data.items?.[0] ?? null;
+        if (artistRes.error) {
+          throw new Error(artistRes.error);
+        }
+        const artist = artistRes.data?.items?.[0] ?? null;
         setTopArtist(artist);
 
-        // Fetch top track
+        // Top track
         const trackRes = await fetchUserTopTracks(token, 1, 'short_term');
-        if (trackRes.error) throw new Error(trackRes.error);
-
-        const track = trackRes.data.items?.[0] ?? null;
+        if (trackRes.error) {
+          throw new Error(trackRes.error);
+        }
+        const track = trackRes.data?.items?.[0] ?? null;
         setTopTrack(track);
-
       } catch (err) {
         setError(err.message || 'Failed to load dashboard data.');
       } finally {
@@ -55,7 +58,8 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <section className="dashboard page-container">
-        <output role="status">Loading dashboard…</output>
+        {/* pas de role pour éviter l’erreur eslint no-redundant-roles */}
+        <output>Loading dashboard…</output>
       </section>
     );
   }
@@ -69,29 +73,42 @@ export default function DashboardPage() {
   }
 
   return (
-    <section className="dashboard page-container" aria-labelledby="dashboard-title">
-      <h1 id="dashboard-title" className="page-title">Dashboard</h1>
+    <section
+      className="dashboard page-container"
+      aria-labelledby="dashboard-title"
+    >
+      <h1 id="dashboard-title" className="page-title">
+        Dashboard
+      </h1>
 
+      {/* ARTISTE LE PLUS ÉCOUTÉ */}
       <div className="dashboard-section">
         <h2>🎤 Most listened artist</h2>
         {topArtist ? (
           <SimpleCard
-            image={topArtist.images?.[0]?.url}
+            imageUrl={topArtist.images?.[0]?.url} // <-- CORRECTION APPLIQUÉE
+            imageAlt={topArtist.name}
             title={topArtist.name}
-            subtitle={topArtist.genres.join(', ') || 'No genres available'}
+            subtitle={
+              topArtist.genres?.length
+                ? topArtist.genres.join(', ')
+                : 'No genres available'
+            }
           />
         ) : (
           <p>No artist data available.</p>
         )}
       </div>
 
+      {/* PISTE LA PLUS ÉCOUTÉE */}
       <div className="dashboard-section">
         <h2>🎧 Most listened track</h2>
         {topTrack ? (
           <SimpleCard
-            image={topTrack.album?.images?.[0]?.url}
+            imageUrl={topTrack.album?.images?.[0]?.url} // <-- CORRECTION APPLIQUÉE
+            imageAlt={topTrack.name}
             title={topTrack.name}
-            subtitle={topTrack.artists.map(a => a.name).join(', ')}
+            subtitle={topTrack.artists?.map((a) => a.name).join(', ') || ''}
           />
         ) : (
           <p>No track data available.</p>
