@@ -1,4 +1,4 @@
-// src/pages/TopTracksPage.test.jsx
+// src/pages/TopTracksPage/TopTracksPage.test.jsx
 
 import { describe, expect, test, beforeEach, afterEach, jest } from '@jest/globals';
 import '@testing-library/jest-dom';
@@ -8,6 +8,10 @@ import TopTracksPage, { limit, timeRange } from './TopTracksPage.jsx';
 import * as spotifyApi from '../../api/spotify-me.js';
 import { KEY_ACCESS_TOKEN } from '../../constants/storageKeys.js';
 import { buildTitle } from '../../constants/appMeta.js';
+
+// --- AJOUT ET MOCK DE LA GESTION D'ERREUR DE TOKEN ---
+import { handleTokenError } from '../../utils/handleTokenError';
+jest.mock('../../utils/handleTokenError');
 
 // Mock top tracks data
 const tracksData = {
@@ -30,6 +34,9 @@ describe('TopTracksPage', () => {
 
         // Default mock: successful top tracks fetch
         jest.spyOn(spotifyApi, 'fetchUserTopTracks').mockResolvedValue({ data: tracksData, error: null });
+        
+        // Nettoyer le mock de la fonction de redirection avant chaque test
+        handleTokenError.mockClear(); 
     });
 
     // Restore mocks after each test
@@ -116,9 +123,15 @@ describe('TopTracksPage', () => {
         expect(alert).toHaveTextContent('Network error');
     });
 
+    // --- TEST CORRIGÉ : VERIFIE L'APPEL DE REDIRECTION ET SES ARGUMENTS ---
     test('redirects to login on token expiration', async () => {
-        // Mock fetchUserTopTracks to return token expired error
-        jest.spyOn(spotifyApi, 'fetchUserTopTracks').mockResolvedValue({ tracks: [], error: 'The access token expired' });
+        const expiredError = 'The access token expired';
+        
+        // Mock fetchUserTopTracks pour renvoyer l'erreur de token
+        jest.spyOn(spotifyApi, 'fetchUserTopTracks').mockResolvedValue({ 
+            data: null, 
+            error: expiredError 
+        });
 
         // Render the TopTracksPage
         renderTopTracksPage();
@@ -126,8 +139,15 @@ describe('TopTracksPage', () => {
         // Wait for loading to finish
         await waitForLoadingToFinish();
 
-        // Verify redirection to login page
-        expect(screen.getByText('Login Page')).toBeInTheDocument();
+        // Vérifier que la fonction de gestion d'erreur de token a été appelée 
+        expect(handleTokenError).toHaveBeenCalledTimes(1);
+        
+        // CORRECTION APPLIQUÉE : On vérifie que la fonction a été appelée avec la chaîne d'erreur 
+        // ET un deuxième argument qui est une fonction (expect.any(Function)).
+        expect(handleTokenError).toHaveBeenCalledWith(expiredError, expect.any(Function));
+
+        // Optionnel : Vérifiez que l'élément Login Page N'EST PAS rendu.
+        expect(screen.queryByText('Login Page')).not.toBeInTheDocument();
     });
 
     test('verify styling and accessibility attributes using role', async () => {
