@@ -18,26 +18,22 @@ export const limit = 10;
  * @returns {JSX.Element}
  */
 export default function PlaylistsPage() {
-  // Initialize navigate function
   const navigate = useNavigate();
 
-  // state for playlists data
   const [playlists, setPlaylists] = useState([]);
-
-  // state for loading and error
+  const [totalPlaylists, setTotalPlaylists] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // require token to fetch playlists
   const { token } = useRequireToken();
 
-  // Set document title
-  useEffect(() => { document.title = buildTitle('Playlists'); }, []);
-
+  useEffect(() => {
+    document.title = buildTitle('Playlists');
+  }, []);
 
   useEffect(() => {
-    if (!token) return; // wait for auth check
-    // fetch user playlists when token changes
+    if (!token) return;
+
     fetchUserPlaylists(token, limit)
       .then(res => {
         if (res.error) {
@@ -45,18 +41,41 @@ export default function PlaylistsPage() {
             setError(res.error);
           }
         }
-        setPlaylists(res.data.items);
+
+        setPlaylists(res.data.items ?? []);
+        setTotalPlaylists(res.data.total ?? 0);
       })
-      .catch(err => { setError(err.message); })
-      .finally(() => { setLoading(false); });
+      .catch(err => {
+        setError(err.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [token, navigate]);
 
   return (
     <section className="playlists-container page-container" aria-labelledby="playlists-title">
-      <h1 id="playlists-title" className="playlists-title page-title">Your Playlists</h1>
-      <h2 className="playlists-count">{limit} Playlists</h2>
-      {loading && <output className="playlists-loading" data-testid="loading-indicator">Loading playlists…</output>}
-      {error && !loading && <div className="playlists-error" role="alert">{error}</div>}
+      <h1 id="playlists-title" className="playlists-title page-title">
+        Your Playlists
+      </h1>
+
+      {/* 👇 NOUVEL AFFICHAGE : X of Y Playlists */}
+      <h2 className="playlists-count">
+        {playlists.length} of {totalPlaylists} Playlists
+      </h2>
+
+      {loading && (
+        <output className="playlists-loading" data-testid="loading-indicator">
+          Loading playlists…
+        </output>
+      )}
+
+      {error && !loading && (
+        <div className="playlists-error" role="alert">
+          {error}
+        </div>
+      )}
+
       {!loading && !error && (
         <ol className="playlists-list">
           {playlists.map((playlist) => (
