@@ -1,0 +1,77 @@
+/* Container principal */
+.playlist-detail-container,
+.playlist-detail {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 20px;
+  color: white;
+}
+
+/* HEADER — reprise du style top tracks */
+.playlist-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  margin-bottom: 40px;
+}
+
+/* ⬆️ IMAGE DE COUVERTURE AGRANDIE — STYLE HUGEL */
+.playlist-detail-cover {
+  width: 260px;      /* Plus large */
+  height: 260px;     /* Toujours carré */
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+}
+
+/* Infos playlist */
+.playlist-detail-meta {
+  flex: 1;
+}
+
+.playlist-detail-title {
+  font-size: 2.6rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.playlist-detail-description {
+  font-size: 1.1rem;
+  opacity: 0.85;
+  margin-bottom: 10px;
+  max-width: 700px;
+}
+
+.playlist-detail-owner {
+  opacity: 0.7;
+  margin-bottom: 20px;
+}
+
+/* Bouton Spotify */
+.playlist-detail-open-button {
+  display: inline-block;
+  background-color: #1db954;
+  padding: 12px 22px;
+  border-radius: 30px;
+  font-size: 1rem;
+  color: white;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.playlist-detail-open-button:hover {
+  background-color: #19a148;
+}
+
+/* TRACK LIST */
+.playlist-detail-tracks {
+  list-style: none;
+  margin-top: 20px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
