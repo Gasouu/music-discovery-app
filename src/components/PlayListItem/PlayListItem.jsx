@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import './PlayListItem.css';
 import '../ListItem.css';
 
@@ -8,27 +9,37 @@ import '../ListItem.css';
  */
 export default function PlayListItem({ playlist }) {
   return (
-  <li key={playlist.id} data-testid={`playlist-item-${playlist.id}`} className="list-item playlist-item">
+    <li
+      key={playlist.id}
+      data-testid={`playlist-item-${playlist.id}`}
+      className="list-item playlist-item"
+    >
       <img
         src={playlist.images[0]?.url}
         alt="cover"
         className="playlist-item-cover"
       />
+
       <div className="playlist-item-details">
         <div className="playlist-item-details-header">
           <div className="playlist-item-title">{playlist.name}</div>
-          <div className="playlist-item-owner">By {playlist.owner.display_name}</div>
+          <div className="playlist-item-owner">
+            By {playlist.owner.display_name}
+          </div>
         </div>
-        <div className="playlist-item-tracks">{playlist.tracks.total} tracks</div>
+
+        <div className="playlist-item-tracks">
+          {playlist.tracks.total} tracks
+        </div>
       </div>
-      <a
-        href={playlist.external_urls.spotify}
-        target="_blank"
-        rel="noopener noreferrer"
+
+      {/* ⬇️ AU LIEU D'OUVRIR SPOTIFY, ON NAVIGUE VERS LA PAGE DE DÉTAIL */}
+      <Link
+        to={`/playlist/${playlist.id}`}
         className="playlist-link"
       >
         Open
-      </a>
+      </Link>
     </li>
   );
 }
