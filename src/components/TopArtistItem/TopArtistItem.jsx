@@ -4,10 +4,13 @@ import './TopArtistItem.css';
  * TopArtistItem component displays information about a single top artist.
  * @param {Object} param0 - Component props
  * @param {Object} param0.artist - The artist object containing artist information
- * @param {number} param0.index - The index of the artist in the list
+ * @param {number} param0.index - The index of the artist in the list (0-based)
  * @returns {JSX.Element} The rendered component
  */
 export default function TopArtistItem({ artist, index }) {
+  // 👉 Index utilisateur qui commence à 1
+  const displayIndex = index + 1;
+
   return (
     <li className="artist-item" data-testid={`top-artist-item-${artist.id}`}>
       {artist.images?.[1] && (
@@ -20,7 +23,8 @@ export default function TopArtistItem({ artist, index }) {
       <div className="artist-details">
         <div className="artist-details-header">
           <div className="artist-title">
-            {index}. {artist.name}
+            {/* 1. Test Artist, 2. No Image Artist, etc. */}
+            {displayIndex}. {artist.name}
           </div>
           <div className="artist-genres">
             Genres: {artist.genres.join(', ')}
